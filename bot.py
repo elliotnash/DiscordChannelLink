@@ -1,15 +1,9 @@
-import os
-
-CHANNELS_TO_SYNC = [
-  863993730302607360,
-  863993776275062804
-]
-
-#plz don't use in production :)
-TOKEN = os.environ['TOKEN']
-
 import discord
-import urllib.request
+import toml
+
+config = toml.load('config.toml')
+TOKEN = config['TOKEN']
+CHANNELS_TO_SYNC = config['SYNCED_CHANNELS']
 
 client = discord.Client()
 
