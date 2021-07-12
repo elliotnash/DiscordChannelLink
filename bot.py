@@ -8,7 +8,8 @@ CHANNELS_TO_SYNC = [
 #plz don't use in production :)
 TOKEN = os.environ['TOKEN']
 
-import discord 
+import discord
+import urllib.request
 
 client = discord.Client()
 
@@ -26,7 +27,7 @@ async def on_ready():
 
 @client.event
 async def on_message(msg):
-  if msg.channel.id in CHANNELS_TO_SYNC and not msg.author.bot:
+  if msg.channel.id in CHANNELS_TO_SYNC and not msg.webhook_id:
     for channel_id in CHANNELS_TO_SYNC:
       if channel_id == msg.channel.id:
         continue
@@ -35,11 +36,21 @@ async def on_message(msg):
 
       content = msg.content
       embeds = msg.embeds
-      attachments = msg.attachments
+      files = []
+      for attachment in msg.attachments:
+        if attachment.size <= 8000000:
+          files.append(await attachment.to_file())
 
       username = msg.author.name
       avatar_url = msg.author.avatar_url
 
-      await webhook.send(content=msg.content, username=username, avatar_url=avatar_url, files=attachments, embeds=embeds, allowed_mentions=discord.AllowedMentions.none())
+      await webhook.send(
+        content=content,
+        username=username,
+        avatar_url=avatar_url,
+        files=files,
+        embeds=embeds,
+        allowed_mentions=discord.AllowedMentions.none()
+      )
 
 client.run(TOKEN)
