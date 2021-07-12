@@ -28,23 +28,29 @@ async def on_message(msg):
       channel = await client.fetch_channel(channel_id)
       webhook = await get_webhook(channel)
 
-      content = msg.content
-      embeds = msg.embeds
-      files = []
-      for attachment in msg.attachments:
-        if attachment.size <= 8000000:
-          files.append(await attachment.to_file())
-
       username = msg.author.name
       avatar_url = msg.author.avatar_url
 
-      await webhook.send(
-        content=content,
-        username=username,
-        avatar_url=avatar_url,
-        files=files,
-        embeds=embeds,
-        allowed_mentions=discord.AllowedMentions.none()
+      content = msg.content
+      embeds = msg.embeds
+
+      files = []
+      for attachment in msg.attachments:
+        await webhook.send(
+          content=attachment.url,
+          username=username,
+          avatar_url=avatar_url,
+          allowed_mentions=discord.AllowedMentions.none()
+        )
+
+      if content or embeds:
+        await webhook.send(
+          content=content,
+          username=username,
+          avatar_url=avatar_url,
+          files=files,
+          embeds=embeds,
+          allowed_mentions=discord.AllowedMentions.none()
       )
 
 client.run(TOKEN)
