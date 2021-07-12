@@ -21,36 +21,37 @@ async def on_ready():
 
 @client.event
 async def on_message(msg):
-  if msg.channel.id in CHANNELS_TO_SYNC and not msg.webhook_id:
-    for channel_id in CHANNELS_TO_SYNC:
-      if channel_id == msg.channel.id:
-        continue
-      channel = await client.fetch_channel(channel_id)
-      webhook = await get_webhook(channel)
+  for channels in CHANNELS_TO_SYNC:
+    if msg.channel.id in channels and not msg.webhook_id:
+      for channel_id in channels:
+        if channel_id == msg.channel.id:
+          continue
+        channel = await client.fetch_channel(channel_id)
+        webhook = await get_webhook(channel)
 
-      username = msg.author.name
-      avatar_url = msg.author.avatar_url
+        username = msg.author.name
+        avatar_url = msg.author.avatar_url
 
-      content = msg.content
-      embeds = msg.embeds
+        content = msg.content
+        embeds = msg.embeds
 
-      files = []
-      for attachment in msg.attachments:
-        await webhook.send(
-          content=attachment.url,
-          username=username,
-          avatar_url=avatar_url,
-          allowed_mentions=discord.AllowedMentions.none()
+        files = []
+        for attachment in msg.attachments:
+          await webhook.send(
+            content=attachment.url,
+            username=username,
+            avatar_url=avatar_url,
+            allowed_mentions=discord.AllowedMentions.none()
+          )
+
+        if content or embeds:
+          await webhook.send(
+            content=content,
+            username=username,
+            avatar_url=avatar_url,
+            files=files,
+            embeds=embeds,
+            allowed_mentions=discord.AllowedMentions.none()
         )
-
-      if content or embeds:
-        await webhook.send(
-          content=content,
-          username=username,
-          avatar_url=avatar_url,
-          files=files,
-          embeds=embeds,
-          allowed_mentions=discord.AllowedMentions.none()
-      )
 
 client.run(TOKEN)
